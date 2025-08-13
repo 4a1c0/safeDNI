@@ -34,6 +34,13 @@ npm test
 npm run typecheck
 ```
 
+## Deployment
+This project includes a GitHub Actions workflow to build and publish the app to **GitHub Pages**. Enable Pages in your repository settings and each push to `main` will update the site at:
+
+```
+https://<your-username>.github.io/safeDNI/
+```
+
 ## Privacy
 - No uploads, no analytics, no network calls (except local assets).
 - Service worker blocks cross-origin fetch by default.
