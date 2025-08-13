@@ -7,7 +7,14 @@
     <title>SafeDNI</title>
   </head>
   <body class="min-h-screen bg-gray-50 dark:bg-neutral-900">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <main class="p-4 text-gray-800 dark:text-gray-100">
+      <h1 class="mb-4 text-center text-3xl font-bold">SafeDNI</h1>
+      <div class="mx-auto max-w-xl space-y-4">
+        <input id="front-input" type="file" accept="image/*" class="block w-full" />
+        <img id="front-preview" alt="DNI preview" class="hidden max-w-full" />
+        <button id="save-front" class="px-4 py-2 text-white bg-blue-600 rounded">Download</button>
+      </div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

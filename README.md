@@ -17,7 +17,8 @@ Local web app to sanitize **Spanish DNI** images for safe sharing.
 - Settings persisted in `localStorage`; no analytics or uploads.
 
 ## Tech stack
-TypeScript, Vite, React, Tailwind CSS, Zustand, jsPDF, FileSaver. OpenCV.js and Tesseract.js are lazy‑loaded from local assets.
+TypeScript, Vite, Tailwind CSS and FileSaver. OpenCV.js and Tesseract.js are lazy‑loaded from local assets. The app now uses
+static vanilla JavaScript without React.
 
 ## Status
 This repository contains a starter skeleton. See [`spec.md`](./spec.md) for the full implementation plan.

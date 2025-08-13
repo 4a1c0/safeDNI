@@ -7,17 +7,4 @@ export async function exportPNG(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-/**
- * Export a canvas into a jsPDF instance.
- */
-export async function exportPDF(canvas: HTMLCanvasElement) {
-  const { jsPDF } = await import('jspdf');
-  const pdf = new jsPDF({
-    orientation: 'landscape',
-    unit: 'px',
-    format: [canvas.width, canvas.height],
-  });
-  const img = canvas.toDataURL('image/png');
-  pdf.addImage(img, 'PNG', 0, 0, canvas.width, canvas.height);
-  return pdf;
-}
+// PDF export removed in static build
