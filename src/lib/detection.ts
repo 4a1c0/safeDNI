@@ -4,11 +4,14 @@ import { orderCorners, expandQuad } from './geometry';
 
 /**
  * Attempt to detect card corners using OpenCV.js.
+ * Returns ordered points or null if detection fails.
  */
 export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | null> {
   const cv = await cvReady();
+
   const gray = new cv.Mat();
-  cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY);
+  cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY, 0);
+
   const blurred = new cv.Mat();
   cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
   const edges = new cv.Mat();
@@ -19,7 +22,9 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
   cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
   let best: Point[] | null = null;
+
   let maxArea = 0;
+
   for (let i = 0; i < contours.size(); i++) {
     const cnt = contours.get(i);
     const peri = cv.arcLength(cnt, true);
@@ -27,11 +32,13 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
     cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
     if (approx.rows === 4) {
       const area = cv.contourArea(approx);
+
       if (area > maxArea) {
         maxArea = area;
         const pts: Point[] = [];
         for (let j = 0; j < approx.data32S.length; j += 2) {
           pts.push({ x: approx.data32S[j], y: approx.data32S[j + 1] });
+
         }
         best = pts;
       }
@@ -40,9 +47,11 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
     approx.delete();
   }
 
+
   edges.delete();
   blurred.delete();
   gray.delete();
+
   contours.delete();
   hierarchy.delete();
 
@@ -61,6 +70,7 @@ export async function warpToCard(
   marginPct = 0.02,
 ): Promise<any> {
   const cv = await cvReady();
+
   const widthPx = Math.round(heightPx * aspect);
   const expanded = expandQuad(pts, marginPct);
   const ordered = orderCorners(expanded);
@@ -82,6 +92,7 @@ export async function warpToCard(
 
   srcTri.delete();
   dstTri.delete();
+
   M.delete();
 
   return dst;
