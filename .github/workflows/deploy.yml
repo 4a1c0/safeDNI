@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
+      - run: BASE_URL=/safeDNI/ npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -33,4 +33,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-

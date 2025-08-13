@@ -11,6 +11,7 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
 
   const gray = new cv.Mat();
   cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY, 0);
+
   const blurred = new cv.Mat();
   cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
   const edges = new cv.Mat();
@@ -21,7 +22,9 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
   cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
   let best: Point[] | null = null;
-  let bestArea = 0;
+
+  let maxArea = 0;
+
   for (let i = 0; i < contours.size(); i++) {
     const cnt = contours.get(i);
     const peri = cv.arcLength(cnt, true);
@@ -29,12 +32,13 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
     cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
     if (approx.rows === 4) {
       const area = cv.contourArea(approx);
-      if (area > bestArea) {
-        bestArea = area;
+
+      if (area > maxArea) {
+        maxArea = area;
         const pts: Point[] = [];
-        const data = approx.data32S;
-        for (let j = 0; j < data.length; j += 2) {
-          pts.push({ x: data[j], y: data[j + 1] });
+        for (let j = 0; j < approx.data32S.length; j += 2) {
+          pts.push({ x: approx.data32S[j], y: approx.data32S[j + 1] });
+
         }
         best = pts;
       }
@@ -43,9 +47,11 @@ export async function detectCardCorners(mat: any): Promise<{ pts: Point[] } | nu
     approx.delete();
   }
 
-  gray.delete();
-  blurred.delete();
+
   edges.delete();
+  blurred.delete();
+  gray.delete();
+
   contours.delete();
   hierarchy.delete();
 
@@ -64,27 +70,29 @@ export async function warpToCard(
   marginPct = 0.02,
 ): Promise<any> {
   const cv = await cvReady();
-  const expanded = expandQuad(pts, marginPct);
+
   const widthPx = Math.round(heightPx * aspect);
+  const expanded = expandQuad(pts, marginPct);
+  const ordered = orderCorners(expanded);
 
-  const srcPts = cv.matFromArray(4, 1, cv.CV_32FC2, [
-    expanded[0].x,
-    expanded[0].y,
-    expanded[1].x,
-    expanded[1].y,
-    expanded[2].x,
-    expanded[2].y,
-    expanded[3].x,
-    expanded[3].y,
+  const srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, ordered.flatMap(p => [p.x, p.y]));
+  const dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
+    0,
+    0,
+    widthPx,
+    0,
+    widthPx,
+    heightPx,
+    0,
+    heightPx,
   ]);
-  const dstPts = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, widthPx, 0, widthPx, heightPx, 0, heightPx]);
-  const M = cv.getPerspectiveTransform(srcPts, dstPts);
+  const M = cv.getPerspectiveTransform(srcTri, dstTri);
   const dst = new cv.Mat();
-  const size = new cv.Size(widthPx, heightPx);
-  cv.warpPerspective(mat, dst, M, size, cv.INTER_LINEAR, cv.BORDER_REPLICATE, new cv.Scalar());
+  cv.warpPerspective(mat, dst, M, new cv.Size(widthPx, heightPx), cv.INTER_LINEAR, cv.BORDER_REPLICATE);
 
-  srcPts.delete();
-  dstPts.delete();
+  srcTri.delete();
+  dstTri.delete();
+
   M.delete();
 
   return dst;
