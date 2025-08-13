@@ -1,10 +1,20 @@
 import React from 'react';
 import { PRESETS } from '../lib/redactions';
 
-export default function PresetPicker() {
+interface Props {
+  onSelect: (id: string) => void;
+}
+
+export default function PresetPicker({ onSelect }: Props) {
   return (
-    <select className="rounded border p-2">
-      <option value="">Choose preset</option>
+    <select
+      className="rounded border p-2"
+      onChange={(e) => onSelect(e.target.value)}
+      defaultValue=""
+    >
+      <option value="" disabled>
+        Choose preset
+      </option>
       {PRESETS.map((p) => (
         <option key={p.id} value={p.id}>
           {p.name}
