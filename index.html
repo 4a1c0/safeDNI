@@ -11,8 +11,13 @@
       <h1 class="mb-4 text-center text-3xl font-bold">SafeDNI</h1>
       <div class="mx-auto max-w-xl space-y-4">
         <input id="front-input" type="file" accept="image/*" class="block w-full" />
-        <img id="front-preview" alt="DNI preview" class="hidden max-w-full" />
-        <button id="save-front" class="px-4 py-2 text-white bg-blue-600 rounded">Download</button>
+        <canvas id="card-canvas" class="hidden max-w-full"></canvas>
+        <div id="controls" class="hidden space-y-2">
+          <label class="block text-sm">Margin
+            <input id="margin" type="range" min="0" max="0.1" step="0.005" value="0.02" class="w-full" />
+          </label>
+          <button id="save-front" class="px-4 py-2 text-white bg-blue-600 rounded">Download</button>
+        </div>
       </div>
     </main>
     <script type="module" src="/src/main.ts"></script>
